@@ -1,0 +1,134 @@
+package com.tabish.SpringBootLab.service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tabish.SpringBootLab.config.KafkaTopicConfig;
+import com.tabish.SpringBootLab.event.OrderCreatedEvent;
+import com.tabish.SpringBootLab.event.PaymentPaidEvent;
+import com.tabish.SpringBootLab.observability.CorrelationIds;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.stereotype.Service;
+
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
+@Service
+public class EventProducer {
+
+    public static final String OUTBOX_EVENT_ID_HEADER = "outbox-event-id";
+
+    private static final Logger logger = LoggerFactory.getLogger(EventProducer.class);
+
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+
+    public EventProducer(
+            KafkaTemplate<String, String> kafkaTemplate,
+            ObjectMapper objectMapper
+    ) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
+    }
+
+    public void send(String topic, String key, String payload) {
+        send(topic, key, payload, null);
+    }
+
+    public void send(
+            String topic,
+            String key,
+            String payload,
+            UUID outboxEventId
+    ) {
+        send(topic, null, key, payload, outboxEventId, null);
+    }
+
+    public void send(
+            String topic,
+            Integer partition,
+            String key,
+            String payload,
+            UUID outboxEventId,
+            String correlationId
+    ) {
+        try {
+            ProducerRecord<String, String> record =
+                    new ProducerRecord<>(topic, partition, key, payload);
+
+            if (outboxEventId != null) {
+                record.headers().add(
+                        OUTBOX_EVENT_ID_HEADER,
+                        outboxEventId.toString()
+                                .getBytes(StandardCharsets.UTF_8)
+                );
+            }
+
+            if (correlationId != null && !correlationId.isBlank()) {
+                record.headers().add(
+                        CorrelationIds.KAFKA_HEADER,
+                        correlationId.getBytes(StandardCharsets.UTF_8)
+                );
+            }
+
+            SendResult<String, String> result = kafkaTemplate.send(record).get();
+
+            kafkaTemplate.flush();
+
+            logger.info(
+                    "Sent outbox event: eventId={}, correlationId={}, topic={}, key={}, partition={}, offset={}",
+                    outboxEventId,
+                    correlationId,
+                    result.getRecordMetadata().topic(),
+                    key,
+                    result.getRecordMetadata().partition(),
+                    result.getRecordMetadata().offset()
+            );
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(
+                    "Interrupted while sending Kafka event",
+                    exception
+            );
+        } catch (ExecutionException exception) {
+            throw new RuntimeException(
+                    "Failed to send Kafka event",
+                    exception
+            );
+        }
+    }
+
+    public void sendOrderCreatedEvent(OrderCreatedEvent event) {
+        try {
+            send(
+                    KafkaTopicConfig.ORDER_CREATED_TOPIC,
+                    String.valueOf(event.getOrderId()),
+                    objectMapper.writeValueAsString(event)
+            );
+        } catch (JsonProcessingException exception) {
+            throw new RuntimeException(
+                    "Failed to serialize OrderCreatedEvent",
+                    exception
+            );
+        }
+    }
+
+    public void sendPaymentPaidEvent(PaymentPaidEvent event) {
+        try {
+            send(
+                    KafkaTopicConfig.PAYMENT_PAID_TOPIC,
+                    String.valueOf(event.getPaymentId()),
+                    objectMapper.writeValueAsString(event)
+            );
+        } catch (JsonProcessingException exception) {
+            throw new RuntimeException(
+                    "Failed to serialize PaymentPaidEvent",
+                    exception
+            );
+        }
+    }
+}

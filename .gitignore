@@ -1,0 +1,92 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+.DS_Store
+
+# Environment variables
+.env
+.env.*
+
+# Spring Boot local config
+application-local.properties
+application-dev.properties
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.swp
+observability/secrets/
+
+# Production runtime files
+.env.production
+.env.prod
+.env.local
+.env.*.local
+
+# Local observability state
+prometheus_data/
+grafana_data/
+alertmanager_data/
+backups/
+
+# Keep the safe environment-variable template in Git
+!.env.example
+
+# Local reliability drill evidence
+verification/reliability_drills_*/
+
+# Kubernetes local secrets
+k8s/base/*-secret.yaml
+
+# CloudNativePG local secrets
+k8s/postgres-ha/*-secret.yaml
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# OCI local credentials
+.oci/
+*.pem
+*.key

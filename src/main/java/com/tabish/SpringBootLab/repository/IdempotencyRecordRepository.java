@@ -1,0 +1,19 @@
+package com.tabish.SpringBootLab.repository;
+
+import com.tabish.SpringBootLab.model.IdempotencyRecord;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface IdempotencyRecordRepository extends JpaRepository<IdempotencyRecord, Integer> {
+
+    Optional<IdempotencyRecord> findByIdempotencyKeyAndRequestPath(
+            String idempotencyKey,
+            String requestPath
+    );
+
+    long countByIdempotencyKeyAndRequestPath(
+            String idempotencyKey,
+            String requestPath
+    );
+}

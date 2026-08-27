@@ -1,0 +1,111 @@
+package com.tabish.SpringBootLab.controller;
+
+import com.tabish.SpringBootLab.dto.AddCartItemRequest;
+import com.tabish.SpringBootLab.dto.ApiResponse;
+import com.tabish.SpringBootLab.dto.CartItemResponse;
+import com.tabish.SpringBootLab.dto.UpdateCartItemRequest;
+import com.tabish.SpringBootLab.security.CurrentUserService;
+import com.tabish.SpringBootLab.service.CartService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@Tag(name = "Cart API", description = "Shopping cart APIs")
+public class CartController {
+
+    private final CartService cartService;
+    private final CurrentUserService currentUserService;
+
+    public CartController(
+            CartService cartService,
+            CurrentUserService currentUserService
+    ) {
+        this.cartService = cartService;
+        this.currentUserService = currentUserService;
+    }
+
+    @Operation(summary = "Add item to cart", description = "Add a product to user's shopping cart")
+    @PostMapping("/api/users/{userId}/cart/items")
+    public ResponseEntity<ApiResponse<CartItemResponse>> addItemToCart(
+            @PathVariable Integer userId,
+            @Valid @RequestBody AddCartItemRequest request
+    ) {
+        currentUserService.requireUserIdOrAdmin(userId);
+
+        CartItemResponse cartItem = cartService.addItemToCart(userId, request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Item added to cart successfully",
+                        cartItem
+                )
+        );
+    }
+
+    @Operation(summary = "Get cart items", description = "Get all cart items of a user")
+    @GetMapping("/api/users/{userId}/cart/items")
+    public ResponseEntity<ApiResponse<List<CartItemResponse>>> getCartItems(
+            @PathVariable Integer userId
+    ) {
+        currentUserService.requireUserIdOrAdmin(userId);
+
+        List<CartItemResponse> cartItems = cartService.getCartItems(userId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Success",
+                        cartItems
+                )
+        );
+    }
+
+    @Operation(summary = "Update cart item", description = "Update quantity of a cart item")
+    @PutMapping("/api/users/{userId}/cart/items/{cartItemId}")
+    public ResponseEntity<ApiResponse<CartItemResponse>> updateCartItem(
+            @PathVariable Integer userId,
+            @PathVariable Integer cartItemId,
+            @Valid @RequestBody UpdateCartItemRequest request
+    ) {
+        currentUserService.requireUserIdOrAdmin(userId);
+
+        CartItemResponse cartItem = cartService.updateCartItem(
+                userId,
+                cartItemId,
+                request
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Cart item updated successfully",
+                        cartItem
+                )
+        );
+    }
+
+    @Operation(summary = "Delete cart item", description = "Delete a cart item")
+    @DeleteMapping("/api/users/{userId}/cart/items/{cartItemId}")
+    public ResponseEntity<ApiResponse<Void>> deleteCartItem(
+            @PathVariable Integer userId,
+            @PathVariable Integer cartItemId
+    ) {
+        currentUserService.requireUserIdOrAdmin(userId);
+
+        cartService.deleteCartItem(userId, cartItemId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Cart item deleted successfully",
+                        null
+                )
+        );
+    }
+}

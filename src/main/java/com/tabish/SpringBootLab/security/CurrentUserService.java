@@ -1,0 +1,70 @@
+package com.tabish.SpringBootLab.security;
+
+import com.tabish.SpringBootLab.exception.OrderNotFoundException;
+import com.tabish.SpringBootLab.model.User;
+import com.tabish.SpringBootLab.repository.OrderRepository;
+import com.tabish.SpringBootLab.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+@Service
+public class CurrentUserService {
+
+    private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+
+    public CurrentUserService(
+            UserRepository userRepository,
+            OrderRepository orderRepository
+    ) {
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+    }
+
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid authentication"));
+    }
+
+    public void requireUserIdOrAdmin(Integer userId) {
+        User currentUser = getCurrentUser();
+
+        if (isAdmin(currentUser)) {
+            return;
+        }
+
+        if (!currentUser.getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+    }
+
+    public void requireOrderOwnerOrAdmin(Integer orderId) {
+        User currentUser = getCurrentUser();
+
+        if (isAdmin(currentUser)) {
+            return;
+        }
+
+        Integer ownerId = orderRepository.findOwnerIdById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        if (!ownerId.equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+    }
+
+    private boolean isAdmin(User user) {
+        return "ADMIN".equals(user.getRole());
+    }
+}

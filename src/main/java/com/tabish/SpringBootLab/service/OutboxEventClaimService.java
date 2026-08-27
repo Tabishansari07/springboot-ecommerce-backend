@@ -1,0 +1,64 @@
+package com.tabish.SpringBootLab.service;
+
+import com.tabish.SpringBootLab.model.OutboxEvent;
+import com.tabish.SpringBootLab.model.OutboxEventStatus;
+import com.tabish.SpringBootLab.repository.OutboxEventRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class OutboxEventClaimService {
+
+    private final OutboxEventRepository outboxEventRepository;
+
+    public OutboxEventClaimService(
+            OutboxEventRepository outboxEventRepository
+    ) {
+        this.outboxEventRepository = outboxEventRepository;
+    }
+
+    @Transactional
+    public List<UUID> claimPendingEvents(
+            int batchSize,
+            String instanceId
+    ) {
+        return claimPendingEvents(
+                batchSize,
+                instanceId,
+                LocalDateTime.now()
+        );
+    }
+
+    @Transactional
+    public List<UUID> claimPendingEvents(
+            int batchSize,
+            String instanceId,
+            LocalDateTime eligibleAt
+    ) {
+        List<OutboxEvent> events =
+                outboxEventRepository.findNextPendingEventsForClaim(
+                        batchSize,
+                        eligibleAt
+                );
+
+        events.forEach(event -> event.claimForProcessing(instanceId));
+        outboxEventRepository.saveAll(events);
+
+        return events.stream()
+                .map(OutboxEvent::getId)
+                .toList();
+    }
+
+    @Transactional
+    public int recoverExpiredProcessingEvents(LocalDateTime expiredBefore) {
+        return outboxEventRepository.recoverExpiredProcessingEvents(
+                OutboxEventStatus.PENDING,
+                OutboxEventStatus.PROCESSING,
+                expiredBefore
+        );
+    }
+}

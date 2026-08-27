@@ -1,0 +1,372 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "outbox_events{status=\"PENDING\"}",
+          "legendFormat": "Pending",
+          "refId": "A"
+        }
+      ],
+      "title": "Outbox Pending Events",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "outbox_events{status=\"PROCESSING\"}",
+          "legendFormat": "Processing",
+          "refId": "A"
+        }
+      ],
+      "title": "Outbox Processing Events",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "outbox_events{status=\"FAILED\"}",
+          "legendFormat": "Failed",
+          "refId": "A"
+        }
+      ],
+      "title": "Outbox Failed Events",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 4,
+      "targets": [
+        {
+          "expr": "rate(outbox_publish_success_total[5m])",
+          "legendFormat": "Publish success / sec",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(outbox_publish_failure_total[5m])",
+          "legendFormat": "Publish failure / sec",
+          "refId": "B"
+        }
+      ],
+      "title": "Outbox Publish Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 5,
+      "targets": [
+        {
+          "expr": "increase(outbox_events_claimed_total[5m])",
+          "legendFormat": "Claimed in 5m",
+          "refId": "A"
+        },
+        {
+          "expr": "increase(outbox_processing_recovered_total[5m])",
+          "legendFormat": "Recovered leases in 5m",
+          "refId": "B"
+        }
+      ],
+      "title": "Outbox Worker Activity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 18
+      },
+      "id": 6,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "increase(auth_events_total{action=\"login\",outcome=\"success\"}[30m])",
+          "legendFormat": "Successful logins",
+          "refId": "A"
+        }
+      ],
+      "title": "Login Successes \u2014 Last 30m",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 18
+      },
+      "id": 7,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "increase(auth_events_total{action=\"login\",outcome=\"failure\"}[30m])",
+          "legendFormat": "Failed logins",
+          "refId": "A"
+        }
+      ],
+      "title": "Login Failures \u2014 Last 30m",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "id": 8,
+      "targets": [
+        {
+          "expr": "sum(rate(auth_events_total{action=\"login\",outcome=\"success\"}[5m]))",
+          "legendFormat": "Login success / sec",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(auth_events_total{action=\"login\",outcome=\"failure\"}[5m]))",
+          "legendFormat": "Login failure / sec",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(auth_events_total{action=\"refresh\",outcome=\"success\"}[5m]))",
+          "legendFormat": "Refresh success / sec",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(rate(auth_events_total{action=\"refresh\",outcome=\"failure\"}[5m]))",
+          "legendFormat": "Refresh failure / sec",
+          "refId": "D"
+        }
+      ],
+      "title": "Authentication Activity Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "id": 9,
+      "targets": [
+        {
+          "expr": "increase(auth_events_total{action=\"logout\",outcome=\"success\"}[30m])",
+          "legendFormat": "Logout",
+          "refId": "A"
+        },
+        {
+          "expr": "increase(auth_events_total{action=\"session_revoke\",outcome=\"success\"}[30m])",
+          "legendFormat": "Session revoke",
+          "refId": "B"
+        },
+        {
+          "expr": "increase(auth_events_total{action=\"sessions_revoke_all\",outcome=\"success\"}[30m])",
+          "legendFormat": "Logout all sessions",
+          "refId": "C"
+        }
+      ],
+      "title": "Session Security Actions \u2014 Last 30m",
+      "type": "timeseries"
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": [
+    "spring-boot",
+    "kafka",
+    "outbox",
+    "security",
+    "authentication"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "title": "Spring Boot E-Commerce \u2014 Reliability & Security",
+  "uid": "spring-boot-outbox",
+  "version": 2
+}

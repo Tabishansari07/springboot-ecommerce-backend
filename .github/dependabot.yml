@@ -1,0 +1,44 @@
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Asia/Taipei
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+
+    ignore:
+      - dependency-name: "org.testcontainers:testcontainers-bom"
+        update-types:
+          - "version-update:semver-major"
+
+    groups:
+      spring-and-java:
+        patterns:
+          - "org.springframework*"
+          - "org.springframework.boot*"
+          - "org.springframework.kafka*"
+
+      testing:
+        patterns:
+          - "org.junit*"
+          - "org.mockito*"
+          - "org.testcontainers*"
+          - "org.jacoco*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:30"
+      timezone: Asia/Taipei
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
